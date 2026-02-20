@@ -13,6 +13,7 @@ export function createAccountRouter({ walletService }: AccountRouterDeps): Route
   const controller = createAccountController({ walletService });
 
   router.post("/accounts", asyncHandler(controller.createAccount));
+  router.post("/auth/token", asyncHandler(controller.issueToken));
   router.get("/accounts/me", requireAuth, asyncHandler(controller.getCurrentAccount));
   router.post("/accounts/fund", requireAuth, asyncHandler(controller.fundAccount));
   router.post("/accounts/withdraw", requireAuth, asyncHandler(controller.withdraw));

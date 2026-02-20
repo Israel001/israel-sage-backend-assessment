@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { signAccessToken } from "../lib/token";
 import {
   createAccountSchema,
+  issueTokenSchema,
   moneyActionSchema,
   transferSchema,
   statementQuerySchema
@@ -28,6 +29,13 @@ export function createAccountController({ walletService }: AccountControllerDeps
       const account = await walletService.createAccount(payload);
       const token = signAccessToken(account);
       res.status(201).json({ account, token });
+    },
+
+    async issueToken(req: Request, res: Response): Promise<void> {
+      const payload = issueTokenSchema.parse(req.body);
+      const account = await walletService.getAccountByEmail(payload.email);
+      const token = signAccessToken(account);
+      res.status(200).json({ account, token });
     },
 
     async getCurrentAccount(req: Request, res: Response): Promise<void> {

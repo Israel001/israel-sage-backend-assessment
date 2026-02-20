@@ -69,6 +69,14 @@ export class WalletService {
     }
   }
 
+  async getAccountByEmail(email: string): Promise<AccountResponse> {
+    const account = await this.accounts.findByEmail(email);
+    if (!account) {
+      throw new HttpError(404, "Account not found", "ACCOUNT_NOT_FOUND");
+    }
+    return this.#toAccountResponse(account);
+  }
+
   async getAccount(accountId: string): Promise<AccountResponse> {
     const account = await this.accounts.findById(accountId);
     if (!account) {
@@ -154,7 +162,8 @@ export class WalletService {
 
     const transactions = await this.transactions.listByAccountId(accountId, { limit });
     const filtered = type ? transactions.filter((item) => item.type === type) : transactions;
-    const sqlTemplate = buildStatementSql({ accountId, type, limit });
+    // Keep query composition explicit for future report-store portability.
+    void buildStatementSql({ accountId, type, limit });
 
     return {
       account: this.#toAccountResponse(account),
@@ -166,11 +175,7 @@ export class WalletService {
         fromAccountId: item.fromAccountId,
         toAccountId: item.toAccountId,
         createdAt: item.createdAt
-      })),
-      meta: {
-        generatedWith: "knex",
-        queryTemplate: sqlTemplate.sql
-      }
+      }))
     };
   }
 

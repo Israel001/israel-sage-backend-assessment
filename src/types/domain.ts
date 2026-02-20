@@ -76,10 +76,6 @@ export interface StatementTransactionResponse {
 export interface StatementResponse {
   account: AccountResponse;
   transactions: StatementTransactionResponse[];
-  meta: {
-    generatedWith: "knex";
-    queryTemplate: string;
-  };
 }
 
 export interface TransferResponse {

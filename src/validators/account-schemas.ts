@@ -6,6 +6,10 @@ export const createAccountSchema = z.object({
   email: z.string().trim().email().max(255)
 });
 
+export const issueTokenSchema = z.object({
+  email: z.string().trim().email().max(255)
+});
+
 export const moneyActionSchema = z.object({
   amount: z.union([z.number(), z.string()])
 });
@@ -21,6 +25,7 @@ export const statementQuerySchema = z.object({
 });
 
 export type CreateAccountBody = z.infer<typeof createAccountSchema>;
+export type IssueTokenBody = z.infer<typeof issueTokenSchema>;
 export type MoneyActionBody = z.infer<typeof moneyActionSchema>;
 export type TransferBody = z.infer<typeof transferSchema>;
 export type StatementQuery = z.infer<typeof statementQuerySchema>;

@@ -54,6 +54,42 @@ describe("Wallet API", () => {
     expect(meResponse.body.account.email).toBe("ada@example.com");
   });
 
+  it("issues a fresh token for an existing account by email", async () => {
+    const { app } = createTestServer();
+
+    const created = await createAccount(app, {
+      firstName: "Token",
+      lastName: "Refresh",
+      email: "token-refresh@example.com"
+    });
+
+    const tokenResponse = await request(app).post("/api/auth/token").send({
+      email: "token-refresh@example.com"
+    });
+
+    expect(tokenResponse.statusCode).toBe(200);
+    expect(tokenResponse.body.token).toBeDefined();
+    expect(tokenResponse.body.account.id).toBe(created.account.id);
+
+    const meResponse = await request(app)
+      .get("/api/accounts/me")
+      .set("Authorization", `Bearer ${tokenResponse.body.token}`);
+
+    expect(meResponse.statusCode).toBe(200);
+    expect(meResponse.body.account.email).toBe("token-refresh@example.com");
+  });
+
+  it("returns not found when issuing a token for an unknown account", async () => {
+    const { app } = createTestServer();
+
+    const tokenResponse = await request(app).post("/api/auth/token").send({
+      email: "missing@example.com"
+    });
+
+    expect(tokenResponse.statusCode).toBe(404);
+    expect(tokenResponse.body.error.code).toBe("ACCOUNT_NOT_FOUND");
+  });
+
   it("funds and withdraws from the authenticated account", async () => {
     const { app } = createTestServer();
     const { token } = await createAccount(app, {
@@ -294,7 +330,7 @@ describe("Wallet API", () => {
 
     expect(statementResponse.statusCode).toBe(200);
     expect(statementResponse.body.transactions.length).toBeGreaterThanOrEqual(2);
-    expect(statementResponse.body.meta.generatedWith).toBe("knex");
+    expect(statementResponse.body.meta).toBeUndefined();
   });
 
   it("validates statement query parameters", async () => {
